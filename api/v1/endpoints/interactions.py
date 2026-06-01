@@ -20,7 +20,7 @@ from schemas.interaction import (
     CardGenerateRequest,
     CardGenerateResponse
 )
-from api.deps import get_current_active_user
+from api.deps import get_current_active_user, get_current_user
 from utils.card_generator import generate_wish_card
 
 router = APIRouter(tags=["interactions"])
