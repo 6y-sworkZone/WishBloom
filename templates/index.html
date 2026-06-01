@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}许愿墙 - 许愿树{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">✨ 许愿墙</h1>
+    <p class="page-subtitle">每一个愿望都是一颗闪耀的星星</p>
+</div>
+
+<div class="filters">
+    <button class="filter-btn active" data-category="all" onclick="filterWishes('all')">全部</button>
+    <button class="filter-btn love" data-category="love" onclick="filterWishes('love')">💕 爱情</button>
+    <button class="filter-btn career" data-category="career" onclick="filterWishes('career')">💼 事业</button>
+    <button class="filter-btn study" data-category="study" onclick="filterWishes('study')">📚 学业</button>
+    <button class="filter-btn health" data-category="health" onclick="filterWishes('health')">💚 健康</button>
+    <button class="filter-btn family" data-category="family" onclick="filterWishes('family')">👨‍👩‍👧 家庭</button>
+    <button class="filter-btn other" data-category="other" onclick="filterWishes('other')">🌟 其他</button>
+</div>
+
+<div class="filters" style="margin-top: -0.5rem;">
+    <button class="filter-btn active" data-filter="all" onclick="filterByStatus('all')">全部状态</button>
+    <button class="filter-btn" data-filter="pending" onclick="filterByStatus('pending')">🌱 进行中</button>
+    <button class="filter-btn" data-filter="fulfilled" onclick="filterByStatus('fulfilled')">✨ 已实现</button>
+</div>
+
+<div class="masonry" id="wishWall">
+</div>
+
+<div class="loader" id="loader">
+    <div class="spinner"></div>
+</div>
+{% endblock %}

@@ -1,0 +1,218 @@
+[
+  {
+    "name": "初心者",
+    "description": "许下你的第一个愿望",
+    "icon": "🌟",
+    "condition_type": "wish_count",
+    "condition_value": 1,
+    "points": 10,
+    "is_hidden": false
+  },
+  {
+    "name": "许愿达人",
+    "description": "累计许下10个愿望",
+    "icon": "✨",
+    "condition_type": "wish_count",
+    "condition_value": 10,
+    "points": 30,
+    "is_hidden": false
+  },
+  {
+    "name": "许愿大师",
+    "description": "累计许下50个愿望",
+    "icon": "💫",
+    "condition_type": "wish_count",
+    "condition_value": 50,
+    "points": 100,
+    "is_hidden": false
+  },
+  {
+    "name": "坚持就是胜利",
+    "description": "连续许愿7天",
+    "icon": "📅",
+    "condition_type": "consecutive_wish",
+    "condition_value": 7,
+    "points": 20,
+    "is_hidden": false
+  },
+  {
+    "name": "愿望习惯",
+    "description": "连续许愿30天",
+    "icon": "🗓️",
+    "condition_type": "consecutive_wish",
+    "condition_value": 30,
+    "points": 80,
+    "is_hidden": false
+  },
+  {
+    "name": "百日许愿",
+    "description": "连续许愿100天",
+    "icon": "🏆",
+    "condition_type": "consecutive_wish",
+    "condition_value": 100,
+    "points": 200,
+    "is_hidden": false
+  },
+  {
+    "name": "梦想成真",
+    "description": "第一个愿望实现",
+    "icon": "🎉",
+    "condition_type": "fulfilled_wish",
+    "condition_value": 1,
+    "points": 30,
+    "is_hidden": false
+  },
+  {
+    "name": "愿望收割机",
+    "description": "实现10个愿望",
+    "icon": "🎊",
+    "condition_type": "fulfilled_wish",
+    "condition_value": 10,
+    "points": 100,
+    "is_hidden": false
+  },
+  {
+    "name": "人气王",
+    "description": "收到100条回信",
+    "icon": "💌",
+    "condition_type": "received_replies",
+    "condition_value": 100,
+    "points": 80,
+    "is_hidden": false
+  },
+  {
+    "name": "社交达人",
+    "description": "收到500条回信",
+    "icon": "📬",
+    "condition_type": "received_replies",
+    "condition_value": 500,
+    "points": 150,
+    "is_hidden": false
+  },
+  {
+    "name": "热心肠",
+    "description": "送出100条回信",
+    "icon": "✉️",
+    "condition_type": "sent_replies",
+    "condition_value": 100,
+    "points": 50,
+    "is_hidden": false
+  },
+  {
+    "name": "祈福使者",
+    "description": "祈福100次",
+    "icon": "🙏",
+    "condition_type": "blessing_count",
+    "condition_value": 100,
+    "points": 60,
+    "is_hidden": false
+  },
+  {
+    "name": "祈福大师",
+    "description": "祈福500次",
+    "icon": "🕊️",
+    "condition_type": "blessing_count",
+    "condition_value": 500,
+    "points": 120,
+    "is_hidden": false
+  },
+  {
+    "name": "点赞狂魔",
+    "description": "点赞100个愿望",
+    "icon": "👍",
+    "condition_type": "like_count",
+    "condition_value": 100,
+    "points": 40,
+    "is_hidden": false
+  },
+  {
+    "name": "受欢迎的人",
+    "description": "累计获得100个点赞",
+    "icon": "❤️",
+    "condition_type": "received_likes",
+    "condition_value": 100,
+    "points": 60,
+    "is_hidden": false
+  },
+  {
+    "name": "夜猫子",
+    "description": "凌晨2点许愿",
+    "icon": "🦉",
+    "condition_type": "night_wish",
+    "condition_value": 2,
+    "points": 30,
+    "is_hidden": true
+  },
+  {
+    "name": "早起鸟",
+    "description": "早上6点前许愿",
+    "icon": "🐦",
+    "condition_type": "early_wish",
+    "condition_value": 6,
+    "points": 30,
+    "is_hidden": true
+  },
+  {
+    "name": "收藏家",
+    "description": "收藏20个愿望",
+    "icon": "📚",
+    "condition_type": "favorite_count",
+    "condition_value": 20,
+    "points": 40,
+    "is_hidden": false
+  },
+  {
+    "name": "许愿树守护者",
+    "description": "许愿树达到5级",
+    "icon": "🌳",
+    "condition_type": "tree_level",
+    "condition_value": 5,
+    "points": 80,
+    "is_hidden": false
+  },
+  {
+    "name": "参天大树",
+    "description": "许愿树达到10级",
+    "icon": "🌲",
+    "condition_type": "tree_level",
+    "condition_value": 10,
+    "points": 200,
+    "is_hidden": false
+  },
+  {
+    "name": "社区活跃者",
+    "description": "连续签到30天",
+    "icon": "📆",
+    "condition_type": "checkin_streak",
+    "condition_value": 30,
+    "points": 100,
+    "is_hidden": false
+  },
+  {
+    "name": "完美主义者",
+    "description": "所有愿望都已实现",
+    "icon": "💯",
+    "condition_type": "all_fulfilled",
+    "condition_value": 1,
+    "points": 150,
+    "is_hidden": true
+  },
+  {
+    "name": "神秘访客",
+    "description": "浏览100个愿望",
+    "icon": "👁️",
+    "condition_type": "view_count",
+    "condition_value": 100,
+    "points": 50,
+    "is_hidden": true
+  },
+  {
+    "name": "话题发起者",
+    "description": "创建5个话题",
+    "icon": "💡",
+    "condition_type": "topic_count",
+    "condition_value": 5,
+    "points": 60,
+    "is_hidden": false
+  }
+]

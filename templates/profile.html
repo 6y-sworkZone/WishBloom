@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}个人中心 - 许愿树{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            🌸
+        </div>
+    </div>
+    
+    <div class="profile-info">
+        <h1 class="profile-name" id="profileName">许愿者</h1>
+        <p class="profile-bio" id="profileBio">在这里许下每一个美好的愿望</p>
+    </div>
+    
+    <div class="profile-stats">
+        <div class="profile-stat-item">
+            <div class="profile-stat-value" data-stat="wishes">0</div>
+            <div class="profile-stat-label">许愿数</div>
+        </div>
+        <div class="profile-stat-item">
+            <div class="profile-stat-value" data-stat="fulfilled">0</div>
+            <div class="profile-stat-label">已实现</div>
+        </div>
+        <div class="profile-stat-item">
+            <div class="profile-stat-value" data-stat="likes">0</div>
+            <div class="profile-stat-label">获赞数</div>
+        </div>
+        <div class="profile-stat-item">
+            <div class="profile-stat-value" data-stat="comments">0</div>
+            <div class="profile-stat-label">祝福数</div>
+        </div>
+    </div>
+    
+    <div class="mt-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">我的愿望</h2>
+            <a href="/create" class="btn btn-primary">
+                <span>✨</span>
+                新愿望
+            </a>
+        </div>
+        
+        <div class="filters" style="justify-content: flex-start;">
+            <button class="filter-btn active" data-category="all" onclick="filterUserWishes('all')">全部</button>
+            <button class="filter-btn" data-category="pending" onclick="filterUserWishes('pending')">进行中</button>
+            <button class="filter-btn" data-category="fulfilled" onclick="filterUserWishes('fulfilled')">已实现</button>
+        </div>
+        
+        <div class="masonry" id="userWishes">
+        </div>
+        
+        <div class="empty-state" id="emptyWishes">
+            <div class="empty-state-icon">🌸</div>
+            <div class="empty-state-title">还没有愿望</div>
+            <p>许下你的第一个愿望吧！</p>
+            <a href="/create" class="btn btn-primary mt-4">
+                <span>✨</span>
+                立即许愿
+            </a>
+        </div>
+    </div>
+    
+    <div class="mt-8 bg-secondary rounded-2xl p-6 shadow-lg">
+        <h2 class="text-2xl font-bold mb-6">账户设置</h2>
+        
+        <div class="space-y-4">
+            <button class="btn btn-secondary w-full justify-start" onclick="editProfile()">
+                <span>✏️</span>
+                编辑个人资料
+            </button>
+            <button class="btn btn-secondary w-full justify-start" onclick="changePassword()">
+                <span>🔐</span>
+                修改密码
+            </button>
+            <button class="btn btn-secondary w-full justify-start text-red-500" onclick="logout()">
+                <span>🚪</span>
+                退出登录
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let userWishes = [];
+let userFilter = 'all';
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (currentUser) {
+        document.getElementById('profileName').textContent = currentUser.username;
+        loadUserWishes();
+    } else {
+        window.location.href = '/login';
+    }
+});
+
+async function loadUserWishes() {
+    try {
+        const data = await apiRequest('/users/me/wishes?page_size=50');
+        userWishes = data.items;
+        renderUserWishes();
+    } catch (error) {
+        console.error('Failed to load user wishes:', error);
+    }
+}
+
+function filterUserWishes(filter) {
+    userFilter = filter;
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === filter);
+    });
+    
+    renderUserWishes();
+}
+
+function renderUserWishes() {
+    const container = document.getElementById('userWishes');
+    const emptyState = document.getElementById('emptyWishes');
+    
+    let filteredWishes = userWishes;
+    if (userFilter === 'pending') {
+        filteredWishes = userWishes.filter(w => !w.is_fulfilled);
+    } else if (userFilter === 'fulfilled') {
+        filteredWishes = userWishes.filter(w => w.is_fulfilled);
+    }
+    
+    container.innerHTML = '';
+    
+    if (filteredWishes.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+    }
+    
+    emptyState.style.display = 'none';
+    
+    filteredWishes.forEach((wish, index) => {
+        const card = createWishCard(wish, index);
+        container.appendChild(card);
+    });
+}
+
+function editProfile() {
+    showNotification('编辑个人资料功能开发中...', 'info');
+}
+
+function changePassword() {
+    showNotification('修改密码功能开发中...', 'info');
+}
+</script>
+{% endblock %}

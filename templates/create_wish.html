@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}许下愿望 - 许愿树{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="page-header" style="margin-bottom: 2rem;">
+        <h1 class="page-title">✨ 许下你的愿望</h1>
+        <p class="page-subtitle">心诚则灵，愿你的愿望早日实现</p>
+    </div>
+    
+    <div class="bg-secondary rounded-2xl p-8 shadow-lg">
+        <form id="createWishForm">
+            <div class="form-group">
+                <label class="form-label" for="wishCategory">愿望分类</label>
+                <select class="form-select" id="wishCategory" required>
+                    <option value="">请选择分类</option>
+                    <option value="love">💕 爱情</option>
+                    <option value="career">💼 事业</option>
+                    <option value="study">📚 学业</option>
+                    <option value="health">💚 健康</option>
+                    <option value="family">👨‍👩‍👧 家庭</option>
+                    <option value="other">🌟 其他</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="wishContent">你的愿望</label>
+                <textarea 
+                    class="form-textarea" 
+                    id="wishContent" 
+                    placeholder="在这里写下你的愿望，越详细越好哦..."
+                    required
+                    minlength="5"
+                    maxlength="500"
+                ></textarea>
+                <div class="flex justify-between text-sm mt-2">
+                    <span class="text-gray-500">最少5个字符</span>
+                    <span class="text-gray-500"><span id="charCount">0</span>/500</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="isAnonymous" class="w-5 h-5 rounded" style="accent-color: #ec4899;">
+                    <span class="font-medium">匿名发布</span>
+                </label>
+                <p class="text-sm text-gray-500 mt-2">勾选后其他人将无法看到你的用户名</p>
+            </div>
+            
+            <div class="flex gap-4 mt-8">
+                <button type="button" class="btn btn-secondary flex-1" onclick="window.location.href='/'">
+                    取消
+                </button>
+                <button type="submit" class="btn btn-primary flex-1">
+                    <span>🌸</span>
+                    许下愿望
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const contentTextarea = document.getElementById('wishContent');
+    const charCount = document.getElementById('charCount');
+    
+    contentTextarea.addEventListener('input', () => {
+        charCount.textContent = contentTextarea.value.length;
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}社区 - 许愿树{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">👥 许愿社区</h1>
+    <p class="page-subtitle">与志同道合的人一起分享美好</p>
+</div>
+
+<div class="community-tabs">
+    <button class="community-tab active" data-tab="leaderboard" onclick="switchCommunityTab('leaderboard')">🏆 排行榜</button>
+    <button class="community-tab" data-tab="hot" onclick="switchCommunityTab('hot')">🔥 热门愿望</button>
+    <button class="community-tab" data-tab="recent" onclick="switchCommunityTab('recent')">🆕 最新动态</button>
+</div>
+
+<div class="community-panel" data-panel="leaderboard">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-secondary rounded-2xl p-6 shadow-lg">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span>🏆</span>
+                许愿达人榜
+            </h2>
+            <div id="leaderboardList">
+                <div class="text-center py-8">
+                    <div class="spinner mx-auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="community-panel" data-panel="hot" style="display: none;">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-secondary rounded-2xl p-6 shadow-lg">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span>🔥</span>
+                热门愿望
+            </h2>
+            <div class="masonry" style="column-count: 1;" id="hotWishes">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="community-panel" data-panel="recent" style="display: none;">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-secondary rounded-2xl p-6 shadow-lg">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span>🆕</span>
+                最新动态
+            </h2>
+            <div id="recentActivity">
+                <div class="text-center py-8 text-gray-500">
+                    <div class="text-4xl mb-4">📝</div>
+                    <p>暂无动态</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadHotWishes();
+});
+
+async function loadHotWishes() {
+    try {
+        const data = await apiRequest('/wishes?sort=likes&page_size=10');
+        const container = document.getElementById('hotWishes');
+        
+        if (container) {
+            data.items.forEach((wish, index) => {
+                const card = createWishCard(wish, index);
+                container.appendChild(card);
+            });
+        }
+    } catch (error) {
+        console.error('Failed to load hot wishes:', error);
+    }
+}
+</script>
+{% endblock %}

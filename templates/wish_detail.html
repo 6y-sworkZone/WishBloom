@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}愿望详情 - 许愿树{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="mb-6">
+        <a href="/" class="btn btn-secondary">
+            <span>←</span>
+            返回许愿墙
+        </a>
+    </div>
+    
+    <div id="wishDetailContainer">
+        <div class="text-center py-12">
+            <div class="spinner mx-auto"></div>
+            <p class="mt-4 text-gray-500">加载中...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname;
+    const match = path.match(/\/wish\/(\d+)/);
+    if (match) {
+        openWishDetail(parseInt(match[1]));
+    }
+});
+</script>
+{% endblock %}

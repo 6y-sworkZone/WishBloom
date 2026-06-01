@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}许愿日历 - 许愿树{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📅 许愿日历</h1>
+    <p class="page-subtitle">记录每一个愿望的起点与终点</p>
+</div>
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <div class="calendar-nav">
+            <button id="prevMonth" title="上个月">‹</button>
+            <button id="nextMonth" title="下个月">›</button>
+        </div>
+        <div class="calendar-month"></div>
+        <button class="btn btn-secondary" onclick="goToToday()">今天</button>
+    </div>
+    
+    <div class="calendar-grid">
+    </div>
+</div>
+
+<div class="flex justify-center gap-8 mt-6">
+    <div class="flex items-center gap-2">
+        <span class="calendar-dot wish"></span>
+        <span class="text-gray-600">许愿日</span>
+    </div>
+    <div class="flex items-center gap-2">
+        <span class="calendar-dot fulfilled"></span>
+        <span class="text-gray-600">实现日</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function goToToday() {
+    currentDate = new Date();
+    renderCalendar(currentDate);
+}
+</script>
+{% endblock %}
