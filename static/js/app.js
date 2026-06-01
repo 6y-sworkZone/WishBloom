@@ -1,21 +1,21 @@
 const API_BASE = '/api/v1';
 
 const CATEGORY_COLORS = {
-  love: '#f472b6',
-  career: '#3b82f6',
-  study: '#22c55e',
-  health: '#06b6d4',
-  family: '#f97316',
-  other: '#a855f7'
+  '爱情': '#f472b6',
+  '事业': '#3b82f6',
+  '学业': '#22c55e',
+  '健康': '#06b6d4',
+  '家庭': '#f97316',
+  '其他': '#a855f7'
 };
 
 const CATEGORY_NAMES = {
-  love: '爱情',
-  career: '事业',
-  study: '学业',
-  health: '健康',
-  family: '家庭',
-  other: '其他'
+  '爱情': '爱情',
+  '事业': '事业',
+  '学业': '学业',
+  '健康': '健康',
+  '家庭': '家庭',
+  '其他': '其他'
 };
 
 const CARD_BACKGROUNDS = [
@@ -540,11 +540,13 @@ function initCreateWishForm() {
       return;
     }
     
+    const title = document.getElementById('wishTitle').value.trim();
     const content = document.getElementById('wishContent').value.trim();
     const category = document.getElementById('wishCategory').value;
+    const visibility = document.getElementById('wishVisibility').value;
     const isAnonymous = document.getElementById('isAnonymous').checked;
     
-    if (!content || !category) {
+    if (!title || !content || !category || !visibility) {
       showNotification('请填写完整信息', 'error');
       return;
     }
@@ -553,8 +555,10 @@ function initCreateWishForm() {
       const wish = await apiRequest('/wishes', {
         method: 'POST',
         body: {
+          title,
           content,
           category,
+          visibility,
           is_anonymous: isAnonymous
         }
       });
@@ -772,7 +776,7 @@ function drawLeaves(ctx, wishes, width, height) {
     const x = centerX + Math.cos(rad) * distance;
     const y = groundY - 200 - Math.sin(rad) * distance + (Math.random() - 0.5) * 50;
     
-    const color = wish.is_fulfilled ? '#fbbf24' : CATEGORY_COLORS[wish.category] || CATEGORY_COLORS.other;
+    const color = wish.is_fulfilled ? '#fbbf24' : CATEGORY_COLORS[wish.category] || CATEGORY_COLORS['其他'];
     
     drawLeaf(ctx, x, y, color, wish.is_fulfilled);
     

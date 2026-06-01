@@ -12,15 +12,36 @@
     <div class="bg-secondary rounded-2xl p-8 shadow-lg">
         <form id="createWishForm">
             <div class="form-group">
+                <label class="form-label" for="wishTitle">愿望标题</label>
+                <input 
+                    type="text" 
+                    class="form-input" 
+                    id="wishTitle" 
+                    placeholder="给你的愿望起个名字吧..."
+                    required
+                    maxlength="200"
+                >
+            </div>
+            
+            <div class="form-group">
                 <label class="form-label" for="wishCategory">愿望分类</label>
                 <select class="form-select" id="wishCategory" required>
                     <option value="">请选择分类</option>
-                    <option value="love">💕 爱情</option>
-                    <option value="career">💼 事业</option>
-                    <option value="study">📚 学业</option>
-                    <option value="health">💚 健康</option>
-                    <option value="family">👨‍👩‍👧 家庭</option>
-                    <option value="other">🌟 其他</option>
+                    <option value="爱情">💕 爱情</option>
+                    <option value="事业">💼 事业</option>
+                    <option value="学业">📚 学业</option>
+                    <option value="健康">💚 健康</option>
+                    <option value="家庭">👨‍👩‍👧 家庭</option>
+                    <option value="其他">🌟 其他</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="wishVisibility">可见性</label>
+                <select class="form-select" id="wishVisibility" required>
+                    <option value="公开">🌍 公开 - 所有人可见</option>
+                    <option value="好友可见">👥 好友可见 - 仅好友可见</option>
+                    <option value="仅自己可见">🔒 仅自己可见 - 私密</option>
                 </select>
             </div>
             
