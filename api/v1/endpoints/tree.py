@@ -9,7 +9,7 @@ import random
 
 from database import get_db
 from models import WishTree, Watering, Wish, User, Checkin, Friendship
-from api.deps import get_current_user
+from api.deps import get_current_user, get_current_active_user
 from schemas.tree import (
     WishTreeResponse,
     WishLeafResponse,
@@ -270,7 +270,7 @@ def update_tree_decorations(db: Session, tree: WishTree, user: User):
 @router.get("/me", response_model=WishTreeResponse)
 def get_my_tree(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     tree = get_or_create_wish_tree(db, current_user.id)
     update_tree_decorations(db, tree, current_user)
@@ -334,7 +334,7 @@ def get_user_tree(
 @router.get("/me/leaves", response_model=List[WishLeafResponse])
 def get_my_leaves(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     tree = get_or_create_wish_tree(db, current_user.id)
     wishes = db.query(Wish).filter(Wish.user_id == current_user.id).order_by(Wish.created_at).all()

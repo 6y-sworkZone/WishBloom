@@ -373,10 +373,10 @@ async function toggleLike(wishId, event) {
 
 async function openWishDetail(wishId) {
   try {
-    const wish = await apiRequest(`/wishes/${wishId}`);
-    const comments = await apiRequest(`/wishes/${wishId}/comments`);
+    const wish = await apiRequest(`/interactions/wishes/${wishId}`);
+    const replies = await apiRequest(`/interactions/replies/${wishId}`);
     
-    renderWishModal(wish, comments);
+    renderWishModal(wish, replies);
     
     const modal = document.getElementById('wishModal');
     modal.classList.add('show');
@@ -392,16 +392,17 @@ function renderWishModal(wish, comments) {
   modalBody.innerHTML = `
     <div class="wish-card ${wish.is_fulfilled ? 'fulfilled' : ''}" style="margin-bottom: 1.5rem;">
       <div class="wish-card-header">
-        <img src="${wish.user?.avatar || '/static/avatar/default.svg'}" 
-             alt="${wish.user?.username || '匿名用户'}" 
+        <img src="${wish.user_avatar || wish.user?.avatar || '/static/avatar/default.svg'}" 
+             alt="${wish.user_nickname || wish.user?.username || '匿名用户'}" 
              class="wish-avatar">
         <div class="wish-user-info">
-          <div class="wish-username">${escapeHtml(wish.user?.username || '匿名用户')}</div>
+          <div class="wish-username">${escapeHtml(wish.user_nickname || wish.user?.username || '匿名用户')}</div>
           <div class="wish-time">${formatTime(wish.created_at)}</div>
         </div>
         <span class="wish-category category-${wish.category}">${CATEGORY_NAMES[wish.category] || wish.category}</span>
       </div>
-      <div class="wish-content" style="font-size: 1.1rem;">${escapeHtml(wish.content)}</div>
+      <div class="wish-title" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.75rem;">${escapeHtml(wish.title)}</div>
+      <div class="wish-content" style="font-size: 1rem; line-height: 1.6;">${escapeHtml(wish.content)}</div>
       ${wish.is_fulfilled ? `
         <div style="margin-top: 1rem; padding: 1rem; background: rgba(251, 191, 36, 0.2); border-radius: 12px;">
           <strong>✨ 已实现！</strong>
@@ -410,83 +411,189 @@ function renderWishModal(wish, comments) {
       ` : ''}
     </div>
     
-    <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">祝福留言 (${comments.length})</h3>
+    <div class="interaction-buttons" style="display: flex; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap;">
+      <button id="likeBtn" class="btn ${wish.is_liked ? 'btn-primary' : 'btn-secondary'}" style="flex: 1; min-width: 100px;">
+        <span>❤️</span>
+        <span id="likeCount">${wish.like_count || 0}</span>
+        <span class="btn-text">${wish.is_liked ? '已点赞' : '点赞'}</span>
+      </button>
+      
+      <button id="blessBtn" class="btn ${wish.is_blessed ? 'btn-primary' : 'btn-secondary'}" style="flex: 1; min-width: 100px;">
+        <span>🙏</span>
+        <span id="blessCount">${wish.blessing_count || 0}</span>
+        <span class="btn-text">${wish.is_blessed ? '已祈福' : '帮你祈福'}</span>
+      </button>
+      
+      <button id="replyToggleBtn" class="btn btn-secondary" style="flex: 1; min-width: 100px;">
+        <span>💌</span>
+        <span id="replyCount">${wish.reply_count || 0}</span>
+        <span class="btn-text">回信</span>
+      </button>
+    </div>
     
-    ${currentUser ? `
-      <form id="commentForm" style="margin-bottom: 1.5rem;">
-        <div class="form-group">
-          <textarea class="form-textarea" id="commentContent" placeholder="写下你的祝福..." required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">发送祝福</button>
-      </form>
-    ` : `<p style="margin-bottom: 1.5rem; color: var(--text-secondary);">请<a href="/login" style="color: var(--primary);">登录</a>后发送祝福</p>`}
-    
-    <div id="commentsList">
-      ${comments.length === 0 ? `
-        <div class="empty-state" style="padding: 2rem;">
-          <div class="empty-state-icon">💝</div>
-          <div class="empty-state-title">暂无祝福</div>
-          <p>成为第一个送上祝福的人吧！</p>
-        </div>
-      ` : comments.map(comment => `
-        <div style="display: flex; gap: 0.75rem; padding: 1rem 0; border-bottom: 1px solid var(--border);">
-          <img src="${comment.user?.avatar || '/static/avatar/default.svg'}" 
-               alt="${comment.user?.username || '匿名'}" 
-               style="width: 36px; height: 36px; border-radius: 50%;">
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-              <strong>${escapeHtml(comment.user?.username || '匿名')}</strong>
-              <span style="font-size: 0.8rem; color: var(--text-muted);">${formatTime(comment.created_at)}</span>
-            </div>
-            <p style="color: var(--text-primary);">${escapeHtml(comment.content)}</p>
+    <div id="replySection" style="display: none;">
+      <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">💌 祝福回信 (${comments.length})</h3>
+      
+      ${currentUser ? `
+        <form id="replyForm" style="margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <textarea class="form-textarea" id="replyContent" placeholder="写下你的鼓励、祝福或建议..." required></textarea>
           </div>
-        </div>
-      `).join('')}
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem;">
+              <input type="checkbox" id="replyAnonymous" class="w-4 h-4" style="accent-color: #ec4899;">
+              <span>匿名回复</span>
+            </label>
+            <button type="submit" class="btn btn-primary" style="margin-left: auto;">发送回信</button>
+          </div>
+        </form>
+      ` : `<p style="margin-bottom: 1.5rem; color: var(--text-secondary);">请<a href="/login" style="color: var(--primary);">登录</a>后发送回信</p>`}
+      
+      <div id="repliesList">
+        ${comments.length === 0 ? `
+          <div class="empty-state" style="padding: 2rem;">
+            <div class="empty-state-icon">💝</div>
+            <div class="empty-state-title">暂无回信</div>
+            <p>成为第一个送上祝福的人吧！</p>
+          </div>
+        ` : comments.map(comment => `
+          <div style="display: flex; gap: 0.75rem; padding: 1rem 0; border-bottom: 1px solid var(--border);">
+            <img src="${comment.user_avatar || comment.user?.avatar || '/static/avatar/default.svg'}" 
+                 alt="${comment.user_nickname || comment.user?.username || '匿名'}" 
+                 style="width: 36px; height: 36px; border-radius: 50%;">
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                <strong>${escapeHtml(comment.user_nickname || comment.user?.username || '匿名')}</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">${formatTime(comment.created_at)}</span>
+              </div>
+              <p style="color: var(--text-primary);">${escapeHtml(comment.content)}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
     </div>
   `;
   
   if (currentUser) {
-    const commentForm = document.getElementById('commentForm');
-    commentForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const content = document.getElementById('commentContent').value.trim();
-      
-      if (!content) return;
-      
+    const likeBtn = document.getElementById('likeBtn');
+    const blessBtn = document.getElementById('blessBtn');
+    const replyToggleBtn = document.getElementById('replyToggleBtn');
+    const replySection = document.getElementById('replySection');
+    const replyForm = document.getElementById('replyForm');
+    
+    likeBtn.addEventListener('click', async () => {
       try {
-        const newComment = await apiRequest(`/wishes/${wish.id}/comments`, {
-          method: 'POST',
-          body: { content }
+        const result = await apiRequest(`/interactions/likes/${wish.id}`, {
+          method: 'POST'
         });
         
-        document.getElementById('commentContent').value = '';
-        
-        const commentsList = document.getElementById('commentsList');
-        const newCommentHtml = `
-          <div style="display: flex; gap: 0.75rem; padding: 1rem 0; border-bottom: 1px solid var(--border); animation: fadeInUp 0.3s ease-out;">
-            <img src="${currentUser.avatar || '/static/avatar/default.svg'}" 
-                 alt="${currentUser.username}" 
-                 style="width: 36px; height: 36px; border-radius: 50%;">
-            <div style="flex: 1;">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                <strong>${escapeHtml(currentUser.username)}</strong>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">刚刚</span>
-              </div>
-              <p style="color: var(--text-primary);">${escapeHtml(content)}</p>
-            </div>
-          </div>
-        `;
-        
-        if (commentsList.querySelector('.empty-state')) {
-          commentsList.innerHTML = newCommentHtml;
+        document.getElementById('likeCount').textContent = result.like_count;
+        if (result.liked) {
+          likeBtn.classList.remove('btn-secondary');
+          likeBtn.classList.add('btn-primary');
+          likeBtn.querySelector('.btn-text').textContent = '已点赞';
+          showNotification('点赞成功！', 'success');
         } else {
-          commentsList.insertAdjacentHTML('afterbegin', newCommentHtml);
+          likeBtn.classList.remove('btn-primary');
+          likeBtn.classList.add('btn-secondary');
+          likeBtn.querySelector('.btn-text').textContent = '点赞';
+        }
+      } catch (error) {
+        console.error('Failed to toggle like:', error);
+      }
+    });
+    
+    blessBtn.addEventListener('click', async () => {
+      try {
+        if (wish.user_id === currentUser.id) {
+          showNotification('不能为自己的许愿祈福', 'info');
+          return;
         }
         
-        showNotification('祝福发送成功！', 'success');
+        const result = await apiRequest('/interactions/blessings', {
+          method: 'POST',
+          body: { wish_id: wish.id }
+        });
+        
+        document.getElementById('blessCount').textContent = result.blessing_count;
+        blessBtn.classList.remove('btn-secondary');
+        blessBtn.classList.add('btn-primary');
+        blessBtn.querySelector('.btn-text').textContent = '已祈福';
+        showNotification('祈福成功！愿TA的愿望早日实现 🙏', 'success');
       } catch (error) {
-        console.error('Failed to post comment:', error);
+        console.error('Failed to send blessing:', error);
       }
+    });
+    
+    replyToggleBtn.addEventListener('click', () => {
+      if (replySection.style.display === 'none' || !replySection.style.display) {
+        replySection.style.display = 'block';
+        replySection.style.animation = 'fadeInDown 0.3s ease-out';
+      } else {
+        replySection.style.display = 'none';
+      }
+    });
+    
+    if (replyForm) {
+      replyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = document.getElementById('replyContent').value.trim();
+        const isAnonymous = document.getElementById('replyAnonymous').checked;
+        
+        if (!content) return;
+        
+        try {
+          const newReply = await apiRequest('/interactions/replies', {
+            method: 'POST',
+            body: { 
+              wish_id: wish.id,
+              content: content,
+              is_anonymous: isAnonymous
+            }
+          });
+          
+          document.getElementById('replyContent').value = '';
+          document.getElementById('replyAnonymous').checked = false;
+          
+          const repliesList = document.getElementById('repliesList');
+          const newReplyHtml = `
+            <div style="display: flex; gap: 0.75rem; padding: 1rem 0; border-bottom: 1px solid var(--border); animation: fadeInUp 0.3s ease-out;">
+              <img src="${isAnonymous ? '/static/avatar/default.svg' : (currentUser.avatar || '/static/avatar/default.svg')}" 
+                   alt="${isAnonymous ? '匿名' : currentUser.nickname || currentUser.username}" 
+                   style="width: 36px; height: 36px; border-radius: 50%;">
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                  <strong>${escapeHtml(isAnonymous ? '匿名' : (currentUser.nickname || currentUser.username))}</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">刚刚</span>
+                </div>
+                <p style="color: var(--text-primary);">${escapeHtml(content)}</p>
+              </div>
+            </div>
+          `;
+          
+          if (repliesList.querySelector('.empty-state')) {
+            repliesList.innerHTML = newReplyHtml;
+          } else {
+            repliesList.insertAdjacentHTML('afterbegin', newReplyHtml);
+          }
+          
+          document.getElementById('replyCount').textContent = parseInt(document.getElementById('replyCount').textContent) + 1;
+          showNotification('回信发送成功！', 'success');
+        } catch (error) {
+          console.error('Failed to post reply:', error);
+        }
+      });
+    }
+  } else {
+    const likeBtn = document.getElementById('likeBtn');
+    const blessBtn = document.getElementById('blessBtn');
+    const replyToggleBtn = document.getElementById('replyToggleBtn');
+    
+    [likeBtn, blessBtn, replyToggleBtn].forEach(btn => {
+      btn.addEventListener('click', () => {
+        showNotification('请先登录', 'info');
+        window.location.href = '/login';
+      });
     });
   }
 }
@@ -665,21 +772,56 @@ async function initWishTree() {
   
   window.addEventListener('resize', () => {
     resizeCanvas(canvas);
-    drawTree(ctx, canvas.width, canvas.height);
-    drawLeaves(ctx, wishesForTree, canvas.width, canvas.height);
+    drawTree(ctx, canvas.width, canvas.height, window.treeGrowthLevel || 1);
+    drawLeavesWithCoords(ctx, wishesForTree, canvas.width, canvas.height);
   });
   
   try {
-    const data = await apiRequest('/wishes?page_size=100');
-    wishesForTree = data.items;
+    const treeData = await apiRequest('/tree/me');
+    const leavesData = await apiRequest('/tree/me/leaves');
     
-    drawTree(ctx, canvas.width, canvas.height);
-    drawLeaves(ctx, wishesForTree, canvas.width, canvas.height);
+    window.treeGrowthLevel = treeData.growth_level || 1;
+    wishesForTree = leavesData.map(leaf => ({
+      id: leaf.wish_id,
+      category: leaf.category,
+      is_fulfilled: leaf.is_fulfilled,
+      x: leaf.x,
+      y: leaf.y,
+      created_at: leaf.created_at
+    }));
+    
+    const treeStats = document.createElement('div');
+    treeStats.className = 'tree-stats';
+    treeStats.innerHTML = `
+      <div class="stat-item">
+        <span class="stat-value">${treeData.wish_count || 0}</span>
+        <span class="stat-label">个愿望</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">${treeData.fulfilled_count || 0}</span>
+        <span class="stat-label">已实现</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">${treeData.growth_level || 1}</span>
+        <span class="stat-label">等级</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">${treeData.energy || 0}</span>
+        <span class="stat-label">能量</span>
+      </div>
+    `;
+    const container = document.querySelector('.tree-container');
+    const existingStats = container.querySelector('.tree-stats');
+    if (existingStats) existingStats.remove();
+    container.appendChild(treeStats);
+    
+    drawTree(ctx, canvas.width, canvas.height, window.treeGrowthLevel || 1);
+    drawLeavesWithCoords(ctx, wishesForTree, canvas.width, canvas.height);
     
     canvas.addEventListener('click', (e) => handleLeafClick(e, canvas, wishesForTree));
   } catch (error) {
     console.error('Failed to load wishes for tree:', error);
-    drawTree(ctx, canvas.width, canvas.height);
+    drawTree(ctx, canvas.width, canvas.height, 1);
   }
 }
 
@@ -697,23 +839,28 @@ function resizeCanvas(canvas) {
   ctx.scale(dpr, dpr);
 }
 
-function drawTree(ctx, width, height) {
-  const centerX = width / (2 * (window.devicePixelRatio || 1));
-  const groundY = height / (window.devicePixelRatio || 1) - 50;
-  const treeHeight = groundY - 100;
+function drawTree(ctx, width, height, growthLevel = 1) {
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = width / dpr;
+  const cssHeight = height / dpr;
+  const centerX = cssWidth / 2;
+  const groundY = cssHeight - 50;
   
-  ctx.clearRect(0, 0, width, height);
+  const scale = 0.6 + (growthLevel * 0.05);
+  const treeHeight = (groundY - 100) * Math.min(scale, 1.2);
+  
+  ctx.clearRect(0, 0, cssWidth, cssHeight);
   
   ctx.fillStyle = '#d4a574';
   ctx.beginPath();
-  ctx.moveTo(centerX - 40, groundY);
-  ctx.lineTo(centerX - 25, groundY - treeHeight * 0.4);
-  ctx.quadraticCurveTo(centerX - 20, groundY - treeHeight * 0.5, centerX - 15, groundY - treeHeight * 0.6);
-  ctx.lineTo(centerX - 8, groundY - treeHeight);
-  ctx.lineTo(centerX + 8, groundY - treeHeight);
-  ctx.lineTo(centerX + 15, groundY - treeHeight * 0.6);
-  ctx.quadraticCurveTo(centerX + 20, groundY - treeHeight * 0.5, centerX + 25, groundY - treeHeight * 0.4);
-  ctx.lineTo(centerX + 40, groundY);
+  ctx.moveTo(centerX - 40 * scale, groundY);
+  ctx.lineTo(centerX - 25 * scale, groundY - treeHeight * 0.4);
+  ctx.quadraticCurveTo(centerX - 20 * scale, groundY - treeHeight * 0.5, centerX - 15 * scale, groundY - treeHeight * 0.6);
+  ctx.lineTo(centerX - 8 * scale, groundY - treeHeight);
+  ctx.lineTo(centerX + 8 * scale, groundY - treeHeight);
+  ctx.lineTo(centerX + 15 * scale, groundY - treeHeight * 0.6);
+  ctx.quadraticCurveTo(centerX + 20 * scale, groundY - treeHeight * 0.5, centerX + 25 * scale, groundY - treeHeight * 0.4);
+  ctx.lineTo(centerX + 40 * scale, groundY);
   ctx.closePath();
   ctx.fill();
   
@@ -722,17 +869,37 @@ function drawTree(ctx, width, height) {
   for (let i = 0; i < 5; i++) {
     const y = groundY - (treeHeight * 0.1 * (i + 1));
     ctx.beginPath();
-    ctx.moveTo(centerX - 30 + i * 3, y);
-    ctx.quadraticCurveTo(centerX, y - 10, centerX + 30 - i * 3, y);
+    ctx.moveTo(centerX - 30 * scale + i * 3, y);
+    ctx.quadraticCurveTo(centerX, y - 10, centerX + 30 * scale - i * 3, y);
     ctx.stroke();
   }
   
-  drawBranch(ctx, centerX, groundY - treeHeight * 0.8, -60, treeHeight * 0.3, 8);
-  drawBranch(ctx, centerX, groundY - treeHeight * 0.7, 60, treeHeight * 0.35, 8);
-  drawBranch(ctx, centerX, groundY - treeHeight * 0.6, -40, treeHeight * 0.25, 6);
-  drawBranch(ctx, centerX, groundY - treeHeight * 0.5, 40, treeHeight * 0.28, 6);
-  drawBranch(ctx, centerX, groundY - treeHeight * 0.4, -70, treeHeight * 0.2, 5);
-  drawBranch(ctx, centerX, groundY - treeHeight * 0.3, 70, treeHeight * 0.22, 5);
+  drawBranch(ctx, centerX, groundY - treeHeight * 0.8, -60, treeHeight * 0.3 * scale, 8 * scale);
+  drawBranch(ctx, centerX, groundY - treeHeight * 0.7, 60, treeHeight * 0.35 * scale, 8 * scale);
+  drawBranch(ctx, centerX, groundY - treeHeight * 0.6, -40, treeHeight * 0.25 * scale, 6 * scale);
+  drawBranch(ctx, centerX, groundY - treeHeight * 0.5, 40, treeHeight * 0.28 * scale, 6 * scale);
+  drawBranch(ctx, centerX, groundY - treeHeight * 0.4, -70, treeHeight * 0.2 * scale, 5 * scale);
+  drawBranch(ctx, centerX, groundY - treeHeight * 0.3, 70, treeHeight * 0.22 * scale, 5 * scale);
+}
+
+function drawLeavesWithCoords(ctx, leaves, width, height) {
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = width / dpr;
+  const cssHeight = height / dpr;
+  const scaleX = cssWidth / 400;
+  const scaleY = cssHeight / 500;
+  
+  leafPositions = [];
+  
+  leaves.forEach((leaf) => {
+    const x = leaf.x * scaleX;
+    const y = leaf.y * scaleY;
+    const color = leaf.is_fulfilled ? '#fbbf24' : CATEGORY_COLORS[leaf.category] || CATEGORY_COLORS['其他'];
+    
+    drawLeaf(ctx, x, y, color, leaf.is_fulfilled);
+    
+    leafPositions.push({ x, y, wish: { id: leaf.id, category: leaf.category, is_fulfilled: leaf.is_fulfilled } });
+  });
 }
 
 function drawBranch(ctx, startX, startY, angle, length, width) {

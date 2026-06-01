@@ -23,7 +23,7 @@ from schemas.interaction import (
 from api.deps import get_current_active_user
 from utils.card_generator import generate_wish_card
 
-router = APIRouter(prefix="/interactions", tags=["interactions"])
+router = APIRouter(tags=["interactions"])
 
 picked_wishes_cache = {}
 
@@ -407,7 +407,7 @@ async def get_wishes_with_stats(
 async def get_wish_detail(
     wish_id: int,
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(lambda: None)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
     wish = db.query(Wish).filter(Wish.id == wish_id).first()
     if not wish:
